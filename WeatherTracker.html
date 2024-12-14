@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Tracker with Alerts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .weather {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .alert {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffcccc;
+            color: #a00;
+            border: 1px solid #a00;
+            border-radius: 5px;
+        }
+        .safety-tips {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e0ffe0;
+            color: #0a0;
+            border: 1px solid #0a0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Tracker with Alerts</h1>
+        <div>
+            <label for="city">Enter City:</label>
+            <input type="text" id="city" placeholder="E.g., London">
+            <button onclick="fetchWeather()">Get Weather</button>
+        </div>
+        <div class="weather" id="weather"></div>
+        <div class="alert" id="alert" style="display: none;"></div>
+        <div class="safety-tips" id="safety-tips" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function fetchWeather() {
+            const city = document.getElementById('city').value;
+            if (!city) {
+                alert('Please enter a city name!');
+                return;
+            }
+
+            const apiKey = 'a761e97726db0810b32f7fae2df03742';
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('City not found');
+                }
+
+                const data = await response.json();
+                displayWeather(data);
+            } catch (error) {
+                document.getElementById('weather').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayWeather(data) {
+            const weatherDiv = document.getElementById('weather');
+            const alertDiv = document.getElementById('alert');
+            const safetyTipsDiv = document.getElementById('safety-tips');
+
+            const { name, main, weather, wind } = data;
+            const temp = main.temp;
+            const description = weather[0].description;
+            const windSpeed = wind.speed;
+
+            weatherDiv.innerHTML = `
+                <h2>Weather in ${name}</h2>
+                <p><strong>Temperature:</strong> ${temp}&#8451;</p>
+                <p><strong>Description:</strong> ${description}</p>
+                <p><strong>Wind Speed:</strong> ${windSpeed} m/s</p>
+            `;
+
+            alertDiv.style.display = 'none';
+            safetyTipsDiv.style.display = 'none';
+
+            // Extreme weather conditions
+            if (temp > 40) {
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = 'Heatwave Alert! Stay hydrated and avoid outdoor activities during peak hours.';
+                safetyTipsDiv.style.display = 'block';
+                safetyTipsDiv.innerHTML = 'Wear light clothing and drink plenty of water.';
+            } else if (temp < 0) {
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = 'Freezing Temperatures Alert! Stay warm and avoid prolonged exposure to the cold.';
+                safetyTipsDiv.style.display = 'block';
+                safetyTipsDiv.innerHTML = 'Wear layers and ensure heating systems are functioning.';
+            } else if (windSpeed > 15) {
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = 'High Wind Alert! Secure loose objects and avoid areas with falling debris.';
+                safetyTipsDiv.style.display = 'block';
+                safetyTipsDiv.innerHTML = 'Stay indoors and avoid travel if possible.';
+            } else {
+                safetyTipsDiv.style.display = 'block';
+                safetyTipsDiv.innerHTML = 'The weather is safe. Enjoy your day responsibly!';
+            }
+        }
+    </script>
+</body>
+</html>
